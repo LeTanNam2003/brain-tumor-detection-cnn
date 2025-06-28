@@ -1,0 +1,65 @@
+  0%|                                                                                                                               | 0/30 [00:00<?, ?it/s]Forward: 25.6199s | Backward: 85.8697s | Update: 11.4192s
+Epoch 01 | Train Loss: 0.8378 | Train Acc: 66.57% | Val Loss: 0.6263 | Val Acc: 75.96% | Time: 129.34s | *** New Best ***
+Epoch 01:   3%|███▌                                                                                                      | 1/30 [02:09<1:02:30, 129.34s/it]Forward: 26.0582s | Backward: 88.0968s | Update: 11.3723s
+Epoch 02 | Train Loss: 0.5845 | Train Acc: 77.20% | Val Loss: 0.5117 | Val Acc: 79.52% | Time: 131.98s | *** New Best ***
+Epoch 02:   7%|███████                                                                                                   | 2/30 [04:21<1:01:05, 130.90s/it]Forward: 25.6158s | Backward: 86.4055s | Update: 11.4706s
+Epoch 03 | Train Loss: 0.4745 | Train Acc: 81.88% | Val Loss: 0.4299 | Val Acc: 83.65% | Time: 129.98s | *** New Best ***
+Epoch 03:  10%|██████████▊                                                                                                 | 3/30 [06:31<58:42, 130.48s/it]Forward: 25.5841s | Backward: 87.3914s | Update: 11.5714s
+Epoch 04 | Train Loss: 0.4053 | Train Acc: 84.55% | Val Loss: 0.4870 | Val Acc: 80.55% | Time: 130.99s
+Epoch 04:  13%|██████████████▍                                                                                             | 4/30 [08:42<56:37, 130.68s/it]Forward: 25.4905s | Backward: 89.2261s | Update: 12.1946s
+Epoch 05 | Train Loss: 0.3481 | Train Acc: 86.77% | Val Loss: 0.3532 | Val Acc: 86.41% | Time: 133.36s | *** New Best ***
+Epoch 05:  17%|██████████████████                                                                                          | 5/30 [10:55<54:51, 131.65s/it]Forward: 26.1637s | Backward: 91.8391s | Update: 13.0644s
+Epoch 06 | Train Loss: 0.3016 | Train Acc: 88.59% | Val Loss: 0.3276 | Val Acc: 87.46% | Time: 137.68s | *** New Best ***
+Epoch 06:  20%|█████████████████████▌                                                                                      | 6/30 [13:13<53:28, 133.70s/it]Forward: 25.5198s | Backward: 89.9464s | Update: 12.2049s
+Epoch 07 | Train Loss: 0.2643 | Train Acc: 90.06% | Val Loss: 0.3449 | Val Acc: 87.10% | Time: 134.15s
+Epoch 07:  23%|█████████████████████████▏                                                                                  | 7/30 [15:27<51:18, 133.85s/it]Forward: 26.2490s | Backward: 89.1643s | Update: 12.5309s
+Epoch 08 | Train Loss: 0.2329 | Train Acc: 91.13% | Val Loss: 0.2976 | Val Acc: 88.39% | Time: 134.88s | *** New Best ***
+Epoch 08:  27%|████████████████████████████▊                                                                               | 8/30 [17:42<49:11, 134.18s/it]Forward: 26.0869s | Backward: 89.5157s | Update: 11.4682s
+Epoch 09 | Train Loss: 0.2071 | Train Acc: 92.10% | Val Loss: 0.2855 | Val Acc: 89.60% | Time: 133.53s | *** New Best ***
+Epoch 09:  30%|████████████████████████████████▍                                                                           | 9/30 [19:55<46:53, 133.97s/it]Forward: 26.0120s | Backward: 89.9559s | Update: 12.3892s
+Epoch 10 | Train Loss: 0.1802 | Train Acc: 93.08% | Val Loss: 0.2851 | Val Acc: 89.67% | Time: 135.45s | *** New Best ***
+Epoch 10:  33%|███████████████████████████████████▋                                                                       | 10/30 [22:11<44:48, 134.43s/it]Forward: 30.6941s | Backward: 100.0525s | Update: 13.1867s
+Epoch 11 | Train Loss: 0.1638 | Train Acc: 93.75% | Val Loss: 0.2709 | Val Acc: 90.48% | Time: 150.40s | *** New Best ***
+Epoch 11:  37%|███████████████████████████████████████▏                                                                   | 11/30 [24:41<44:07, 139.32s/it]Forward: 26.0976s | Backward: 89.2432s | Update: 10.9022s
+Epoch 12 | Train Loss: 0.1463 | Train Acc: 94.46% | Val Loss: 0.2574 | Val Acc: 91.32% | Time: 132.65s | *** New Best ***
+Epoch 12:  40%|██████████████████████████████████████████▊                                                                | 12/30 [26:54<41:11, 137.29s/it]Forward: 26.0860s | Backward: 87.8896s | Update: 11.4737s
+Epoch 13 | Train Loss: 0.1304 | Train Acc: 95.15% | Val Loss: 0.2472 | Val Acc: 91.75% | Time: 132.06s | *** New Best ***
+Epoch 13:  43%|██████████████████████████████████████████████▎                                                            | 13/30 [29:06<38:27, 135.71s/it]Forward: 27.0055s | Backward: 89.9072s | Update: 11.8300s
+Epoch 14 | Train Loss: 0.1159 | Train Acc: 95.60% | Val Loss: 0.2718 | Val Acc: 90.74% | Time: 137.01s
+Epoch 14:  47%|█████████████████████████████████████████████████▉                                                         | 14/30 [31:23<36:17, 136.10s/it]Forward: 33.6203s | Backward: 105.2019s | Update: 13.4339s
+Epoch 15 | Train Loss: 0.1112 | Train Acc: 95.81% | Val Loss: 0.2369 | Val Acc: 92.38% | Time: 159.11s | *** New Best ***
+Epoch 15:  50%|█████████████████████████████████████████████████████▌                                                     | 15/30 [34:02<35:45, 143.04s/it]Forward: 28.2848s | Backward: 95.1782s | Update: 12.3005s
+Epoch 16 | Train Loss: 0.0899 | Train Acc: 96.57% | Val Loss: 0.2890 | Val Acc: 91.93% | Time: 142.99s
+Epoch 16:  53%|█████████████████████████████████████████████████████████                                                  | 16/30 [36:25<33:22, 143.02s/it]Forward: 28.5410s | Backward: 94.6001s | Update: 12.3049s
+Epoch 17 | Train Loss: 0.0910 | Train Acc: 96.63% | Val Loss: 0.2943 | Val Acc: 92.24% | Time: 143.07s
+Epoch 17:  57%|████████████████████████████████████████████████████████████▋                                              | 17/30 [38:48<30:59, 143.04s/it]Forward: 28.6063s | Backward: 97.5543s | Update: 12.7628s
+Epoch 18 | Train Loss: 0.0837 | Train Acc: 96.86% | Val Loss: 0.2936 | Val Acc: 91.21% | Time: 145.54s
+Epoch 18:  60%|████████████████████████████████████████████████████████████████▏                                          | 18/30 [41:14<28:45, 143.79s/it]Forward: 30.1723s | Backward: 97.4228s | Update: 12.6189s
+Epoch 19 | Train Loss: 0.0732 | Train Acc: 97.31% | Val Loss: 0.2626 | Val Acc: 92.96% | Time: 146.72s | *** New Best ***
+Epoch 19:  63%|███████████████████████████████████████████████████████████████████▊                                       | 19/30 [43:40<26:31, 144.67s/it]Forward: 27.0618s | Backward: 90.5060s | Update: 11.9554s
+Epoch 20 | Train Loss: 0.0700 | Train Acc: 97.41% | Val Loss: 0.2515 | Val Acc: 93.07% | Time: 135.98s | *** New Best ***
+Epoch 20:  67%|███████████████████████████████████████████████████████████████████████▎                                   | 20/30 [45:56<23:40, 142.06s/it]Forward: 25.8185s | Backward: 87.8928s | Update: 11.1539s
+Epoch 21 | Train Loss: 0.0657 | Train Acc: 97.64% | Val Loss: 0.3007 | Val Acc: 92.21% | Time: 131.45s
+Epoch 21:  70%|██████████████████████████████████████████████████████████████████████████▉                                | 21/30 [48:08<20:49, 138.88s/it]Forward: 25.9101s | Backward: 88.2171s | Update: 11.5254s
+Epoch 22 | Train Loss: 0.0517 | Train Acc: 98.13% | Val Loss: 0.2796 | Val Acc: 93.19% | Time: 133.86s | *** New Best ***
+Epoch 22:  73%|██████████████████████████████████████████████████████████████████████████████▍                            | 22/30 [50:22<18:18, 137.37s/it]Forward: 28.7576s | Backward: 94.9906s | Update: 12.8420s
+Epoch 23 | Train Loss: 0.0461 | Train Acc: 98.32% | Val Loss: 0.2977 | Val Acc: 93.24% | Time: 143.28s | *** New Best ***
+Epoch 23:  77%|██████████████████████████████████████████████████████████████████████████████████                         | 23/30 [52:45<16:14, 139.15s/it]Forward: 25.8283s | Backward: 87.2535s | Update: 10.8991s
+Epoch 24 | Train Loss: 0.0405 | Train Acc: 98.57% | Val Loss: 0.2794 | Val Acc: 93.80% | Time: 130.20s | *** New Best ***
+Epoch 24:  80%|█████████████████████████████████████████████████████████████████████████████████████▌                     | 24/30 [54:55<13:38, 136.46s/it]Forward: 26.4776s | Backward: 89.1598s | Update: 11.2405s
+Epoch 25 | Train Loss: 0.0405 | Train Acc: 98.59% | Val Loss: 0.3093 | Val Acc: 93.56% | Time: 133.07s
+Epoch 25:  83%|█████████████████████████████████████████████████████████████████████████████████████████▏                 | 25/30 [57:08<11:17, 135.44s/it]Forward: 25.7561s | Backward: 86.2029s | Update: 10.4968s
+Epoch 26 | Train Loss: 0.0410 | Train Acc: 98.56% | Val Loss: 0.2834 | Val Acc: 92.86% | Time: 128.56s
+Epoch 26:  87%|████████████████████████████████████████████████████████████████████████████████████████████▋              | 26/30 [59:17<08:53, 133.38s/it]Forward: 26.6766s | Backward: 88.2688s | Update: 10.9836s
+Epoch 27 | Train Loss: 0.0354 | Train Acc: 98.70% | Val Loss: 0.3048 | Val Acc: 92.86% | Time: 132.07s
+Epoch 27:  90%|██████████████████████████████████████████████████████████████████████████████████████████████▌          | 27/30 [1:01:29<06:38, 132.98s/it]Forward: 27.4641s | Backward: 91.3687s | Update: 11.9777s
+Epoch 28 | Train Loss: 0.0356 | Train Acc: 98.81% | Val Loss: 0.2770 | Val Acc: 93.86% | Time: 137.40s | *** New Best ***
+Epoch 28:  93%|██████████████████████████████████████████████████████████████████████████████████████████████████       | 28/30 [1:03:46<04:28, 134.31s/it]Forward: 26.0351s | Backward: 90.0031s | Update: 10.9536s
+Epoch 29 | Train Loss: 0.0336 | Train Acc: 98.85% | Val Loss: 0.2964 | Val Acc: 93.64% | Time: 133.39s
+Epoch 29:  97%|█████████████████████████████████████████████████████████████████████████████████████████████████████▌   | 29/30 [1:06:00<02:14, 134.03s/it]Forward: 26.6762s | Backward: 88.7525s | Update: 10.2249s
+Epoch 30 | Train Loss: 0.0275 | Train Acc: 99.02% | Val Loss: 0.2892 | Val Acc: 93.77% | Time: 132.21s
+Epoch 30: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [1:08:12<00:00, 136.41s/it]
+
+Best model found at epoch 28 with Val Acc: 93.86%
+Best Validation Accuracy: 93.86%
+Model saved to model_weights_iter2.npz
