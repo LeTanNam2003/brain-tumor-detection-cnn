@@ -8,7 +8,7 @@ This repository contains a pytorch Convolutional Neural Network (CNN) architectu
 
 The figure below illustrates the architecture of the custom CNN. It includes multiple convolutional layers, ReLU activations, max pooling, and fully connected layers.
 
-![Model Architecture](./assets/network_architecture.png)
+![Model Architecture](../assets/network_architecture.png)
 
 *Figure 1: Custom CNN Architecture*
 
@@ -18,7 +18,7 @@ The figure below illustrates the architecture of the custom CNN. It includes mul
 
 The model was trained on an augmented MRI dataset. Below are the training and validation accuracy/loss plots over epochs.
 
-![Training Results](./pytorch_model/results/images/result_train_512.png)
+![Training Results](./results/images/result_train_512.png)
 
 *Figure 2: Training and Validation Accuracy/Loss*
 
