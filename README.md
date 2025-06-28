@@ -41,3 +41,8 @@ Both the **PyTorch model** and the **Custom model** share the same CNN architect
 cd pytorch_model
 python pytorch_model.py
 ```
+
+```
+cd app_streamlit
+streamlit run app.py
+```
