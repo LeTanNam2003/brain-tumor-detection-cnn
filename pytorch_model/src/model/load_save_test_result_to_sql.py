@@ -1,3 +1,5 @@
+# python load_save_test_result_to_sql.py --model "C:/Personal/brain-tumor-detection/brain-tumor-detection-cnn/pytorch_model/models/brain_tumor_model_128_001_xoay.pth" --img-size 128 128 --output-db results.db
+# python load_save_test_result_to_sql.py --input-folder "C:/Personal/final_graduate/Report/dataset/Brain_Tumor_MRI_Dataset/Testing1" --model "C:/Personal/brain-tumor-detection/brain-tumor-detection-cnn/pytorch_model/models/brain_tumor_model_128_001_xoay.pth" --img-size 128 128 --output-db results.db
 import tkinter as tk
 from tkinter import filedialog, ttk
 import os
@@ -6,35 +8,32 @@ import cv2
 import torch
 import torch.nn.functional as F
 from PIL import Image, ImageTk
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import sqlite3
 from torchvision import transforms
+import argparse
+
 from pytorch_model import BrainTumorCNN
 
 # ---------- Configuration ----------
 class_names = ["Normal", "Meningioma", "Glioma", "Pituitary"]
-kept_classes = list(range(len(class_names)))
 
-# Same transform used during training
-transform = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-# ---------- Load PyTorch model ----------
-def build_model_pt():
+def build_model_pt(model_path, img_size):
     model = BrainTumorCNN(num_classes=len(class_names))
-    model.load_state_dict(torch.load("brain_tumor_model_1.pth", map_location=torch.device("cpu")))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
     model.eval()
     return model
 
-# ---------- Load dataset ----------
-def load_dataset(folder):
+def load_dataset(folder, img_size):
+    transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize(img_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
     images, labels, image_paths = [], [], []
     for class_idx, class_name in enumerate(class_names):
-        class_dir = os.path.join(folder, class_name.lower())  # match folder name
+        class_dir = os.path.join(folder, class_name.lower())
         if not os.path.exists(class_dir):
             continue
         for img_file in os.listdir(class_dir):
@@ -48,19 +47,90 @@ def load_dataset(folder):
                 image_paths.append(img_path)
     return torch.stack(images), np.array(labels), image_paths
 
+# ---------- CLI Mode ----------
+def run_cli_evaluation(model_path, img_size, db_path, input_folder):
+    model = build_model_pt(model_path, img_size)
+    images, labels, image_paths = load_dataset(input_folder, img_size)
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS predictions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            image_path TEXT NOT NULL,
+            prob_normal REAL,
+            prob_meningioma REAL,
+            prob_glioma REAL,
+            prob_pituitary REAL,
+            predicted_class INTEGER,
+            true_class INTEGER
+        )
+    ''')
+    conn.commit()
+    cursor.execute("DELETE FROM predictions")
+    conn.commit()
+
+    predictions = []
+    batch_size = 32
+
+    for i in range(0, len(images), batch_size):
+        batch = images[i:i+batch_size]
+        with torch.no_grad():
+            outputs = model(batch)
+            probs = F.softmax(outputs, dim=1).numpy()
+            batch_preds = np.argmax(probs, axis=1)
+
+        predictions.extend(batch_preds)
+
+        batch_data = []
+        for j in range(batch.size(0)):
+            img_idx = i + j
+            if img_idx >= len(image_paths):
+                break
+            image_path = image_paths[img_idx]
+            probs_float = [float(p) for p in probs[j]]
+            true_class = int(labels[img_idx])
+            predicted_class = int(batch_preds[j])
+            batch_data.append((image_path, *probs_float, predicted_class, true_class))
+
+        cursor.executemany('''
+            INSERT INTO predictions 
+            (image_path, prob_normal, prob_meningioma, prob_glioma, prob_pituitary, predicted_class, true_class)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', batch_data)
+        conn.commit()
+
+    predictions = np.array(predictions)
+    acc = accuracy_score(labels[:len(predictions)], predictions)
+    report = classification_report(labels[:len(predictions)], predictions, target_names=class_names)
+    conf_matrix = confusion_matrix(labels[:len(predictions)], predictions)
+
+    print("\nEvaluation Results:")
+    print(f"- Accuracy: {acc * 100:.2f}%")
+    print(f"- Processed Images: {len(predictions)}")
+    print("\nClassification Report:")
+    print(report)
+    print("Confusion Matrix:")
+    print(conf_matrix)
+    print(f"\nSaved to database: {db_path}")
+    conn.close()
+
 # ---------- GUI App ----------
 class BatchApp(tk.Tk):
-    def __init__(self):
+    def __init__(self, model_path, img_size, db_path):
         super().__init__()
         self.title("Batch Brain Tumor Classifier (PyTorch)")
         self.geometry("800x600")
 
-        self.model = build_model_pt()
-        self.dataset = None
+        self.model_path = model_path
+        self.img_size = img_size
+        self.db_path = db_path
+
+        self.model = build_model_pt(self.model_path, self.img_size)
+        self.conn = sqlite3.connect(self.db_path)
+        self.create_table()
 
         self.create_widgets()
-        self.conn = sqlite3.connect("predictions.db")
-        self.create_table()
 
     def __del__(self):
         self.conn.close()
@@ -106,9 +176,7 @@ class BatchApp(tk.Tk):
     def load_data_gui(self):
         folder = filedialog.askdirectory()
         if folder:
-            self.progress["value"] = 0
-            self.update_idletasks()
-            self.images, self.labels, self.image_paths = load_dataset(folder)
+            self.images, self.labels, self.image_paths = load_dataset(folder, self.img_size)
             self.dataset = (self.images, self.labels, self.image_paths)
 
             class_counts = np.bincount(self.labels, minlength=4)
@@ -126,7 +194,7 @@ class BatchApp(tk.Tk):
     def show_sample_image(self):
         sample_tensor = self.images[0]
         img = sample_tensor.numpy().transpose(1, 2, 0)
-        img = (img * [0.229, 0.224, 0.225] + [0.485, 0.456, 0.406]) * 255  # Unnormalize
+        img = (img * [0.229, 0.224, 0.225] + [0.485, 0.456, 0.406]) * 255
         img = np.clip(img, 0, 255).astype("uint8")
 
         img = Image.fromarray(img)
@@ -140,15 +208,11 @@ class BatchApp(tk.Tk):
         predictions = []
         all_probs = []
 
-        if not hasattr(self, 'image_paths'):
-            self.images, self.labels, self.image_paths = self.dataset
-
-        self.progress["maximum"] = len(self.images)
-
-        # Clear old predictions
         cursor = self.conn.cursor()
         cursor.execute("DELETE FROM predictions")
         self.conn.commit()
+
+        self.progress["maximum"] = len(self.images)
 
         for i in range(0, len(self.images), batch_size):
             batch = self.images[i:i+batch_size]
@@ -163,8 +227,6 @@ class BatchApp(tk.Tk):
             batch_data = []
             for j in range(batch.size(0)):
                 img_idx = i + j
-                if img_idx >= len(self.image_paths):
-                    break
                 image_path = self.image_paths[img_idx]
                 probs_float = [float(p) for p in probs[j]]
                 true_class = int(self.labels[img_idx])
@@ -183,23 +245,40 @@ class BatchApp(tk.Tk):
 
         predictions = np.array(predictions)
         acc = accuracy_score(self.labels[:len(predictions)], predictions)
-
-        pred_counts = [np.sum(predictions == i) for i in range(4)]
+        report = classification_report(self.labels[:len(predictions)], predictions, target_names=class_names)
+        conf_matrix = confusion_matrix(self.labels[:len(predictions)], predictions)
 
         result = (
             f"Overall Accuracy: {acc * 100:.2f}%\n"
             f"Total Processed Images: {len(predictions)}\n"
-            f"Prediction Distribution:\n"
-            f"- Normal: {pred_counts[0]}\n"
-            f"- Meningioma: {pred_counts[1]}\n"
-            f"- Glioma: {pred_counts[2]}\n"
-            f"- Pituitary: {pred_counts[3]}\n"
-            f"Results have been saved to the database!"
+            f"\nClassification Report:\n{report}\n"
+            f"\nConfusion Matrix:\n{conf_matrix}\n"
+            f"\nResults have been saved to the database!"
         )
+
         self.result_text.delete(1.0, tk.END)
         self.result_text.insert(tk.END, result)
 
-# ---------- Run App ----------
+# ---------- Main Entry ----------
 if __name__ == "__main__":
-    app = BatchApp()
-    app.mainloop()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--img-size", type=int, nargs=2, default=[224, 224])
+    parser.add_argument("--model", type=str, default="brain_tumor_model_128_001_xoay.pth")
+    parser.add_argument("--output-db", type=str, default="predictions.db")
+    parser.add_argument("--input-folder", type=str, help="Optional dataset folder for CLI mode")
+    args = parser.parse_args()
+
+    if args.input_folder:
+        run_cli_evaluation(
+            model_path=args.model,
+            img_size=tuple(args.img_size),
+            db_path=args.output_db,
+            input_folder=args.input_folder
+        )
+    else:
+        app = BatchApp(
+            model_path=args.model,
+            img_size=tuple(args.img_size),
+            db_path=args.output_db
+        )
+        app.mainloop()

@@ -10,11 +10,35 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import configparser
 
-# Load and pre-process image
+# python pytorch_model
+# === Load config ===
+config = configparser.ConfigParser()
+config.read("config.cfg")
+
+# TRAINING
+epochs = config.getint("TRAINING", "epochs")
+batch_size = config.getint("TRAINING", "batch_size")
+learning_rate = config.getfloat("TRAINING", "learning_rate")
+patience = config.getint("TRAINING", "patience")
+use_scheduler = config.getboolean("TRAINING", "use_scheduler")
+optimizer_name = config.get("TRAINING", "optimizer")
+
+# DATA
+data_dir = config.get("DATA", "train_folder")
+image_size = config.getint("DATA", "image_size")
+
+# MODEL
+save_model_path = config.get("MODEL", "save_model_path")
+save_best_model_path = config.get("MODEL", "save_best_model_path")
+save_plot_path = config.get("MODEL", "save_plot_path")
+save_confusion_matrix_path = config.get("MODEL", "save_confusion_matrix_path")
+save_report_path = config.get("MODEL", "save_report_path")
+
+# === Data loading ===
 def load_images_from_folder(folder, label, size=(224, 224)):
     images, labels = [], []
     for filename in os.listdir(folder):
@@ -27,16 +51,17 @@ def load_images_from_folder(folder, label, size=(224, 224)):
             labels.append(label)
     return np.array(images), np.array(labels)
 
-# Augmentation + normalization
+# === Transform ===
 transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(10),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
 ])
 
-# CNN model
+# === Model ===
 class BrainTumorCNN(nn.Module):
     def __init__(self, num_classes=4):
         super(BrainTumorCNN, self).__init__()
@@ -58,18 +83,17 @@ class BrainTumorCNN(nn.Module):
         x = self.features(x)
         return self.classifier(x)
 
-# Trainning function
+# === Train ===
 def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=10, patience=5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    
+
     train_losses, val_losses = [], []
     train_accuracies, val_accuracies = [], []
-    
     best_val_loss = float('inf')
     epochs_no_improve = 0
-    
-    scheduler = ReduceLROnPlateau(optimizer, 'min', patience=2, factor=0.1, verbose=True)
+
+    scheduler = ReduceLROnPlateau(optimizer, 'min', patience=2, factor=0.1, verbose=True) if use_scheduler else None
 
     for epoch in range(epochs):
         model.train()
@@ -109,12 +133,13 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=10
         avg_val_loss = val_loss / len(val_loader)
         val_acc = 100 * correct_val / total_val
 
-        scheduler.step(avg_val_loss)
+        if scheduler:
+            scheduler.step(avg_val_loss)
 
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             epochs_no_improve = 0
-            torch.save(model.state_dict(), 'best_model_1.pth')
+            torch.save(model.state_dict(), save_best_model_path)
         else:
             epochs_no_improve += 1
             if epochs_no_improve == patience:
@@ -133,33 +158,31 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=10
 
     return train_losses, train_accuracies, val_losses, val_accuracies
 
-# Plot the chart
+# === Plot ===
 def plot_results(train_losses, train_accuracies, val_losses, val_accuracies):
-    epochs = range(1, len(train_losses) + 1)
-    
+    epochs_range = range(1, len(train_losses) + 1)
     plt.figure(figsize=(12, 5))
-    
+
     plt.subplot(1, 2, 1)
-    plt.plot(epochs, train_losses, 'bo-', label='Train Loss')
-    plt.plot(epochs, val_losses, 'ro-', label='Val Loss')
+    plt.plot(epochs_range, train_losses, 'bo-', label='Train Loss')
+    plt.plot(epochs_range, val_losses, 'ro-', label='Val Loss')
     plt.title("Loss over Epochs")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.legend()
 
     plt.subplot(1, 2, 2)
-    plt.plot(epochs, train_accuracies, 'bo-', label='Train Acc')
-    plt.plot(epochs, val_accuracies, 'ro-', label='Val Acc')
+    plt.plot(epochs_range, train_accuracies, 'bo-', label='Train Acc')
+    plt.plot(epochs_range, val_accuracies, 'ro-', label='Val Acc')
     plt.title("Accuracy over Epochs")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy (%)")
     plt.legend()
 
     plt.tight_layout()
-    #plt.show()
-    plt.savefig("result_train_512_001.png")
+    plt.savefig(save_plot_path)
 
-# Confusion matrix 
+# === Confusion matrix ===
 def show_confusion_matrix(model, val_loader, class_names):
     device = next(model.parameters()).device
     all_preds, all_labels = [], []
@@ -171,9 +194,7 @@ def show_confusion_matrix(model, val_loader, class_names):
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(yb.cpu().numpy())
 
-    # Confusion Matrix
     cm = confusion_matrix(all_labels, all_preds)
-    
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
     plt.title('Confusion Matrix')
@@ -181,27 +202,39 @@ def show_confusion_matrix(model, val_loader, class_names):
     plt.ylabel('True Label')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig("confusion_matrix_512_001.png")
+    plt.savefig(save_confusion_matrix_path)
 
-    # Classification Report
     report = classification_report(all_labels, all_preds, target_names=class_names, digits=4)
-    print("\nClassification Report:\n")
-    print(report)
+    print("\nClassification Report:\n", report)
 
-    # Save report to file
-    with open("classification_report.txt", "w") as f:
+    with open(save_report_path, "w") as f:
         f.write("Classification Report\n")
         f.write("=====================\n")
         f.write(report)
 
-# ==== MAIN ====
+# === MAIN ===
 if __name__ == "__main__":
-    data_dir = "C:/Personal/final_graduate/Report/dataset/Brain_Tumor_MRI_Dataset/Training"
+    # === Print loaded config ===
+    print("\n=== Loaded Config ===")
+    print(f"Epochs: {epochs}")
+    print(f"Batch size: {batch_size}")
+    print(f"Learning rate: {learning_rate}")
+    print(f"Patience (early stopping): {patience}")
+    print(f"Use scheduler: {use_scheduler}")
+    print(f"Optimizer: {optimizer_name}")
+    print(f"Image size: {image_size}x{image_size}")
+    print(f"Train folder: {data_dir}")
+    print(f"Save model path: {save_model_path}")
+    print(f"Save best model path: {save_best_model_path}")
+    print(f"Plot save path: {save_plot_path}")
+    print(f"Confusion matrix path: {save_confusion_matrix_path}")
+    print(f"Report path: {save_report_path}")
+    print("=====================\n")
 
-    normal_images, normal_labels = load_images_from_folder(os.path.join(data_dir, "normal"), label=0)
-    meningioma_images, meningioma_labels = load_images_from_folder(os.path.join(data_dir, "meningioma"), label=1)
-    glioma_images, glioma_labels = load_images_from_folder(os.path.join(data_dir, "glioma"), label=2)
-    pituitary_images, pituitary_labels = load_images_from_folder(os.path.join(data_dir, "pituitary"), label=3)
+    normal_images, normal_labels = load_images_from_folder(os.path.join(data_dir, "normal"), label=0, size=(image_size, image_size))
+    meningioma_images, meningioma_labels = load_images_from_folder(os.path.join(data_dir, "meningioma"), label=1, size=(image_size, image_size))
+    glioma_images, glioma_labels = load_images_from_folder(os.path.join(data_dir, "glioma"), label=2, size=(image_size, image_size))
+    pituitary_images, pituitary_labels = load_images_from_folder(os.path.join(data_dir, "pituitary"), label=3, size=(image_size, image_size))
 
     X = np.concatenate([normal_images, meningioma_images, glioma_images, pituitary_images])
     y = np.concatenate([normal_labels, meningioma_labels, glioma_labels, pituitary_labels])
@@ -213,18 +246,23 @@ if __name__ == "__main__":
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
     y_val_tensor = torch.tensor(y_val, dtype=torch.long)
 
-    train_loader = DataLoader(TensorDataset(x_train_tensor, y_train_tensor), batch_size=16, shuffle=True)
-    val_loader = DataLoader(TensorDataset(x_val_tensor, y_val_tensor), batch_size=16)
+    train_loader = DataLoader(TensorDataset(x_train_tensor, y_train_tensor), batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(TensorDataset(x_val_tensor, y_val_tensor), batch_size=batch_size)
 
     model = BrainTumorCNN(num_classes=4)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    
+    if optimizer_name.lower() == "adam":
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    elif optimizer_name.lower() == "sgd":
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
+    else:
+        raise ValueError(f"Unsupported optimizer: {optimizer_name}")
 
     train_losses, train_accuracies, val_losses, val_accuracies = train_model(
-        model, train_loader, val_loader, criterion, optimizer, epochs=50
+        model, train_loader, val_loader, criterion, optimizer, epochs=epochs, patience=patience
     )
 
-    torch.save(model.state_dict(), "brain_tumor_model_1_001.pth")
-
+    torch.save(model.state_dict(), save_model_path)
     plot_results(train_losses, train_accuracies, val_losses, val_accuracies)
     show_confusion_matrix(model, val_loader, ["Normal", "Meningioma", "Glioma", "Pituitary"])
