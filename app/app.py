@@ -105,7 +105,7 @@ def grad_cam_app():
     st.title("Brain Tumor Classifier with Grad-CAM & Batch Prediction")
 
     @st.cache_resource
-    def load_model(model_path="brain_tumor_model_1.pth"):
+    def load_model(model_path="brain_tumor_model_128_001_xoay.pth"):
         model = BrainTumorCNN(num_classes=4)
         model.load_state_dict(torch.load(model_path, map_location=device))
         model.eval().to(device)
@@ -114,7 +114,7 @@ def grad_cam_app():
     model = load_model()
 
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((128, 128)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                             std=[0.229, 0.224, 0.225])
@@ -198,7 +198,7 @@ def grad_cam_app():
 
         # Grad-CAM
         st.subheader("Grad-CAM")
-        np_img = np.array(image.resize((224, 224))).astype(np.float32) / 255.0
+        np_img = np.array(image.resize((128, 128))).astype(np.float32) / 255.0
         grayscale_cam = get_gradcam(model, img_tensor, pred_class)
         cam_img = show_cam_on_image(np_img, grayscale_cam, use_rgb=True)
         st.image(cam_img, caption="Grad-CAM", use_column_width=True)
@@ -262,7 +262,7 @@ def custom_cnn_app():
             Linear(128, 4), Softmax()
         ]
         model = CNN(layers=layers, loss_fn=CrossEntropy(), lr=0.01)
-        model.load_model("model_weights_iter3.npz")
+        model.load_model("model_weights_iter4.npz")
         return model
 
     model = load_custom_model()
@@ -279,7 +279,7 @@ def custom_cnn_app():
             img_np = np.array(img)
             temp_path = "temp.jpg"
             cv2.imwrite(temp_path, cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR))
-            x = load_img(temp_path)
+            x = load_img(temp_path, (64, 64))
 
             # Forward pass + lưu feature maps
             x_input = x.copy()
