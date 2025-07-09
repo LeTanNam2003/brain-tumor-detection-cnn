@@ -36,11 +36,7 @@ Both the **PyTorch model** and the **Custom model** share the same CNN architect
 - Augmented MRI dataset for improved generalization.
 - Modular design: train, analyze, and deploy independently.
 
-## How to run
-```
-cd pytorch_model
-python pytorch_model.py
-```
+## How to run APP
 
 ```
 cd app_streamlit
