@@ -42,3 +42,5 @@ Both the **PyTorch model** and the **Custom model** share the same CNN architect
 cd app_streamlit
 streamlit run app.py
 ```
+## DataSet
+[Kangle: brain-tumor-mri-dataset](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset/data)
